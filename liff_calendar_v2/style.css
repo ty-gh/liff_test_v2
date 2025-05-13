@@ -1,22 +1,30 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* カレンダーが長くなる場合を考慮 */
+    flex-direction: column; /* 要素を縦に並べる */
+    align-items: center;    /* 中央揃え */
     min-height: 100vh;
     margin: 0;
     background-color: #f4f7f6;
-    padding-top: 20px; /* 上部に少し余白 */
+    padding: 20px 10px; /* 上下左右に少しパディング */
+    box-sizing: border-box;
 }
 
-.calendar-container {
+.container { /* 全体をラップするコンテナ */
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 90%;
-    max-width: 400px; /* 最大幅を設定 */
+    width: 100%;
+    max-width: 450px; /* 少し幅を広げる */
+}
+
+.calendar-container {
+    /* background-color, padding, border-radius, box-shadow は .container に移動 */
+    text-align: center;
+    width: 100%; /* 親要素に合わせる */
+    margin-bottom: 20px; /* 時間選択エリアとの間隔 */
 }
 
 .calendar-header {
@@ -50,15 +58,15 @@ body {
 #calendar {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* セルの幅を均等にする */
+    table-layout: fixed;
 }
 
 #calendar th,
 #calendar td {
     border: 1px solid #e0e0e0;
-    padding: 10px 0; /* 上下パディング、左右は均等配置で調整 */
+    padding: 10px 0;
     text-align: center;
-    box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+    box-sizing: border-box;
 }
 
 #calendar th {
@@ -79,8 +87,8 @@ body {
 }
 
 #calendar td.today {
-    background-color: #fff3cd; /* 少し薄い黄色 */
-    color: #856404; /* 暗めの黄色テキスト */
+    background-color: #fff3cd;
+    color: #856404;
     font-weight: bold;
 }
 
@@ -99,10 +107,56 @@ body {
     cursor: default;
 }
 #calendar td.empty:hover {
-    background-color: #fdfdfd; /* ホバー効果なし */
+    background-color: #fdfdfd;
 }
 
-#selected-date-info {
+/* 時間選択セクションのスタイル */
+#time-selection-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+#time-selection-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+#time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* レスポンシブなグリッド */
+    gap: 10px; /* ボタン間の隙間 */
+}
+
+.time-slot-button {
+    padding: 10px 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.time-slot-button:hover {
+    background-color: #0056b3;
+}
+
+.time-slot-button.selected-time {
+    background-color: #28a745; /* 選択された時間の色 (緑系) */
+    font-weight: bold;
+}
+.time-slot-button.selected-time:hover {
+    background-color: #1e7e34;
+}
+
+
+#selected-datetime-info {
     margin-top: 20px;
     padding: 10px;
     background-color: #e9ecef;
@@ -111,28 +165,14 @@ body {
     color: #333;
 }
 
-#selected-date-value {
+#selected-datetime-value {
     font-weight: bold;
 }
 
-#selected-date-info {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #e9ecef;
-    border-radius: 5px;
-    font-size: 1em;
-    color: #333;
-}
-
-#selected-date-value {
-    font-weight: bold;
-}
-
-/* 送信ボタンのスタイル */
-#send-date-button {
+#send-datetime-button {
     margin-top: 20px;
     padding: 12px 20px;
-    background-color: #00B900; /* LINEグリーンに近い色 */
+    background-color: #00B900;
     color: white;
     border: none;
     border-radius: 5px;
@@ -140,23 +180,23 @@ body {
     font-size: 1em;
     font-weight: bold;
     transition: background-color 0.2s, opacity 0.2s;
-    width: 100%; /* 幅をコンテナに合わせる */
-    box-sizing: border-box; /* paddingをwidthに含める */
+    width: 100%;
+    box-sizing: border-box;
 }
 
-#send-date-button:hover:not(:disabled) {
-    background-color: #008e00; /* 少し暗いグリーン */
+#send-datetime-button:hover:not(:disabled) {
+    background-color: #008e00;
 }
 
-#send-date-button:disabled {
+#send-datetime-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
     opacity: 0.7;
 }
 
-/* LIFFステータス表示用スタイル (任意) */
 #liff-status {
      font-size: 0.9em;
      color: #555;
      text-align: center;
+     margin-top: 15px; /* 少し下に */
 }
