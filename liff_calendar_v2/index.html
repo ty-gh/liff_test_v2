@@ -3,38 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>シンプルなカレンダー</title>
+    <title>日時選択カレンダー</title>
     <link rel="stylesheet" href="style.css">
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-    <div class="calendar-container">
-        <div class="calendar-header">
-            <button id="prev-month" aria-label="前の月へ">&lt;</button>
-            <h2 id="current-month-year"></h2>
-            <button id="next-month" aria-label="次の月へ">&gt;</button>
+    <div class="container"> <!-- 全体をラップするコンテナを追加 -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prev-month" aria-label="前の月へ"><</button>
+                <h2 id="current-month-year"></h2>
+                <button id="next-month" aria-label="次の月へ">></button>
+            </div>
+            <table id="calendar">
+                <thead>
+                    <tr>
+                        <th>日</th>
+                        <th>月</th>
+                        <th>火</th>
+                        <th>水</th>
+                        <th>木</th>
+                        <th>金</th>
+                        <th>土</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <!-- 日付がここにJavaScriptによって挿入されます -->
+                </tbody>
+            </table>
         </div>
-        <table id="calendar">
-            <thead>
-                <tr>
-                    <th>日</th>
-                    <th>月</th>
-                    <th>火</th>
-                    <th>水</th>
-                    <th>木</th>
-                    <th>金</th>
-                    <th>土</th>
-                </tr>
-            </thead>
-            <tbody id="calendar-body">
-                <!-- 日付がここにJavaScriptによって挿入されます -->
-            </tbody>
-        </table>
-        <div id="selected-date-info">
-            選択された日付: <span id="selected-date-value">未選択</span>
+
+        <!-- 時間選択セクション -->
+        <div id="time-selection-container" style="display: none;">
+            <h3>時間を選択してください:</h3>
+            <div id="time-slots">
+                <!-- 時間ブロックがここにJavaScriptによって挿入されます -->
+            </div>
         </div>
-        <!-- 日時送信ボタン -->
-        <button id="send-date-button" disabled>日時をLINEに送信</button>
+
+        <div id="selected-datetime-info">
+            選択された日時: <span id="selected-datetime-value">未選択</span>
+        </div>
+
+        <button id="send-datetime-button" disabled>日時をLINEに送信</button>
+    </div>
+
+    <div id="liff-status" style="display: none; margin-top:10px; padding:10px; background-color:#f0f0f0; border-radius:5px;">
+        LIFF Status: <span id="liff-status-message">Initializing...</span>
     </div>
 
     <script src="script.js"></script>
