@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSelectedDateObj = null;
     let currentSelectedTimeStr = null; // 選択された時間を保持 (例: "10:30")
 
-    const MY_LIFF_ID = "YOUR_LIFF_ID"; // ★★★ ご自身のLIFF IDに置き換えてください ★★★
+    const MY_LIFF_ID = "2007408982-8W0x1kq3"; // ★★★ ご自身のLIFF IDに置き換えてください ★★★
 
     async function initializeLiff() {
         try {
