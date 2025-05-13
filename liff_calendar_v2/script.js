@@ -1,71 +1,56 @@
-document.addEventListener('DOMContentLoaded', async () => { // async を追加
+document.addEventListener('DOMContentLoaded', async () => {
     const currentMonthYearElement = document.getElementById('current-month-year');
     const calendarBody = document.getElementById('calendar-body');
     const prevMonthButton = document.getElementById('prev-month');
     const nextMonthButton = document.getElementById('next-month');
-    const selectedDateValueElement = document.getElementById('selected-date-value');
-    const sendDateButton = document.getElementById('send-date-button');
+    const selectedDatetimeValueElement = document.getElementById('selected-datetime-value'); // ID変更
+    const sendDatetimeButton = document.getElementById('send-datetime-button'); // ID変更
+    const timeSelectionContainer = document.getElementById('time-selection-container');
+    const timeSlotsDiv = document.getElementById('time-slots');
 
-    // --- LIFF関連の要素 (任意) ---
     const liffStatusContainer = document.getElementById('liff-status');
     const liffStatusMessage = document.getElementById('liff-status-message');
-    // --------------------------
 
     let currentDate = new Date();
     let currentSelectedDateObj = null;
+    let currentSelectedTimeStr = null; // 選択された時間を保持 (例: "10:30")
 
-    // ***** 重要: ここにご自身のLIFF IDを設定してください *****
-    const MY_LIFF_ID = "2007408982-8W0x1kq3"; // 例: "1234567890-AbcdefgH"
-    // *****************************************************
+    const MY_LIFF_ID = "YOUR_LIFF_ID"; // ★★★ ご自身のLIFF IDに置き換えてください ★★★
 
-    // --- LIFF初期化処理 ---
     async function initializeLiff() {
         try {
             if (liffStatusContainer) liffStatusContainer.style.display = 'block';
             if (liffStatusMessage) liffStatusMessage.textContent = 'LIFF SDKを初期化中...';
-
             await liff.init({ liffId: MY_LIFF_ID });
-
             if (liffStatusMessage) liffStatusMessage.textContent = 'LIFF SDK初期化完了。';
 
             if (!liff.isLoggedIn()) {
                 if (liffStatusMessage) liffStatusMessage.textContent = 'LINEにログインしていません。ログインします...';
-                // 開発中は自動ログインをコメントアウトして、手動でログインを試すこともできます
-                // window.alert("LINEにログインしていません。LIFFを開き直してログインしてください。");
-                liff.login(); // ログインしていなければログインページにリダイレクト
-                return; // ログインリダイレクト後は処理を中断
+                liff.login();
+                return;
             } else {
-                if (liffStatusMessage) liffStatusMessage.textContent = `LINEログイン済み (User ID: ${liff.getDecodedIDToken().sub})`;
+                if (liffStatusMessage) liffStatusMessage.textContent = `LINEログイン済み`;
             }
-
-            // カレンダーの初期表示
             renderCalendar(currentDate);
-
         } catch (error) {
             console.error("LIFF Initialization failed", error);
             if (liffStatusMessage) liffStatusMessage.textContent = `LIFF初期化エラー: ${error.message}`;
-            selectedDateValueElement.textContent = "LIFFの初期化に失敗しました。";
-            // LIFFが使えない場合でもカレンダーは表示したいなら、ここでrenderCalendarを呼ぶ
-            // renderCalendar(currentDate);
-            // ただし、送信機能は動作しない
-            sendDateButton.disabled = true;
-            sendDateButton.textContent = "LIFFエラー";
+            selectedDatetimeValueElement.textContent = "LIFFの初期化に失敗しました。";
+            sendDatetimeButton.disabled = true;
+            sendDatetimeButton.textContent = "LIFFエラー";
         }
     }
-    // --------------------------
 
     function renderCalendar(dateToDisplay) {
         calendarBody.innerHTML = '';
         const year = dateToDisplay.getFullYear();
         const month = dateToDisplay.getMonth();
-
         currentMonthYearElement.textContent = `${year}年 ${month + 1}月`;
 
         const firstDayOfMonth = new Date(year, month, 1);
         const lastDayOfMonth = new Date(year, month + 1, 0);
         const daysInMonth = lastDayOfMonth.getDate();
         const firstDayOfWeek = firstDayOfMonth.getDay();
-
         const today = new Date();
 
         let dateCounter = 1;
@@ -95,21 +80,20 @@ document.addEventListener('DOMContentLoaded', async () => { // async を追加
                     cell.addEventListener('click', () => {
                         if (cell.classList.contains('empty')) return;
 
+                        // 日付の選択状態を更新
                         const previouslySelectedCell = calendarBody.querySelector('.selected');
                         if (previouslySelectedCell) {
                             previouslySelectedCell.classList.remove('selected');
                         }
-
                         cell.classList.add('selected');
                         currentSelectedDateObj = cellDate;
-                        const displayDate = `${year}年${month + 1}月${dateCounter}日`;
-                        selectedDateValueElement.textContent = displayDate;
-                        console.log('Selected Date:', currentSelectedDateObj.toISOString());
 
-                        // 日付が選択されたら送信ボタンを有効化
-                        if (liff.isLoggedIn()) { // LIFFが利用可能な場合のみ
-                            sendDateButton.disabled = false;
-                        }
+                        // 時間選択をリセットし、時間選択UIを表示
+                        currentSelectedTimeStr = null;
+                        updateSelectedDatetimeDisplay(); // まず日付のみで更新
+                        renderTimeSlots();
+                        timeSelectionContainer.style.display = 'block';
+                        sendDatetimeButton.disabled = true; // 時間が選択されるまで送信不可
                     });
                     dateCounter++;
                 }
@@ -123,20 +107,85 @@ document.addEventListener('DOMContentLoaded', async () => { // async を追加
         }
     }
 
+    function renderTimeSlots() {
+        timeSlotsDiv.innerHTML = ''; // 既存の時間スロットをクリア
+        const startTime = 10 * 60; // 10:00 を分で表現
+        const endTime = 18 * 60;   // 18:00 を分で表現
+        const interval = 30;       // 30分間隔
+
+        for (let minutes = startTime; minutes <= endTime; minutes += interval) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            const timeString = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+
+            const button = document.createElement('button');
+            button.classList.add('time-slot-button');
+            button.textContent = timeString;
+            button.dataset.time = timeString; // data属性に時間を格納
+
+            if (timeString === currentSelectedTimeStr) {
+                button.classList.add('selected-time');
+            }
+
+            button.addEventListener('click', () => {
+                // 以前選択された時間ボタンのスタイルをクリア
+                const previouslySelectedTimeButton = timeSlotsDiv.querySelector('.selected-time');
+                if (previouslySelectedTimeButton) {
+                    previouslySelectedTimeButton.classList.remove('selected-time');
+                }
+                // 新しい時間ボタンを選択状態にする
+                button.classList.add('selected-time');
+                currentSelectedTimeStr = timeString;
+                updateSelectedDatetimeDisplay();
+
+                // 日付と時間が両方選択されたら送信ボタンを有効化
+                if (currentSelectedDateObj && currentSelectedTimeStr && liff.isLoggedIn()) {
+                    sendDatetimeButton.disabled = false;
+                }
+            });
+            timeSlotsDiv.appendChild(button);
+        }
+    }
+
+    function updateSelectedDatetimeDisplay() {
+        if (currentSelectedDateObj) {
+            const year = currentSelectedDateObj.getFullYear();
+            const month = currentSelectedDateObj.getMonth() + 1;
+            const day = currentSelectedDateObj.getDate();
+            let displayText = `${year}年${month}月${day}日`;
+            if (currentSelectedTimeStr) {
+                displayText += ` ${currentSelectedTimeStr}`;
+            }
+            selectedDatetimeValueElement.textContent = displayText;
+        } else {
+            selectedDatetimeValueElement.textContent = "未選択";
+        }
+    }
+
+
     prevMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar(currentDate);
+        timeSelectionContainer.style.display = 'none'; // 月移動時は時間選択を隠す
+        currentSelectedDateObj = null; // 選択をリセット
+        currentSelectedTimeStr = null;
+        updateSelectedDatetimeDisplay();
+        sendDatetimeButton.disabled = true;
     });
 
     nextMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar(currentDate);
+        timeSelectionContainer.style.display = 'none'; // 月移動時は時間選択を隠す
+        currentSelectedDateObj = null; // 選択をリセット
+        currentSelectedTimeStr = null;
+        updateSelectedDatetimeDisplay();
+        sendDatetimeButton.disabled = true;
     });
 
-    // --- 送信ボタンの処理 ---
-    sendDateButton.addEventListener('click', async () => {
-        if (!currentSelectedDateObj) {
-            alert("まず日付を選択してください。");
+    sendDatetimeButton.addEventListener('click', async () => {
+        if (!currentSelectedDateObj || !currentSelectedTimeStr) {
+            alert("日付と時間を選択してください。");
             return;
         }
         if (!liff.isLoggedIn()) {
@@ -149,23 +198,19 @@ document.addEventListener('DOMContentLoaded', async () => { // async を追加
         const day = currentSelectedDateObj.getDate();
         const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][currentSelectedDateObj.getDay()];
 
-        const messageText = `選択された日時: ${year}年${month}月${day}日 (${dayOfWeek}曜日)`;
+        const messageText = `選択された日時: ${year}年${month}月${day}日(${dayOfWeek}) ${currentSelectedTimeStr}`;
 
         try {
-            if (liff.isInClient()) { // LINEアプリ内で開かれているか確認
+            if (liff.isInClient()) {
                 await liff.sendMessages([
                     {
                         type: 'text',
                         text: messageText
                     }
                 ]);
-                // 送信後、LIFFを閉じる
                 liff.closeWindow();
             } else {
-                // LINEアプリ外 (外部ブラウザなど) で開かれている場合のフォールバック
-                // このサンプルではアラートを表示するのみ
                 alert(`以下のメッセージをLINEで送信します (実際には送信されません):\n${messageText}\n\nLINEアプリ内で開いてください。`);
-                // 開発用にコンソールにも出力
                 console.log("Message to send (not in LINE client):", messageText);
             }
         } catch (error) {
@@ -173,16 +218,12 @@ document.addEventListener('DOMContentLoaded', async () => { // async を追加
             alert(`メッセージの送信に失敗しました: ${error.message}`);
         }
     });
-    // ------------------------
 
     // LIFF初期化を実行
-    await initializeLiff(); // async関数内でawaitを使う
-    // initializeLiff().then(() => {
-    //     // カレンダー初期表示はinitializeLiff内で行う
-    // }).catch(error => {
-    //     console.error("Error during LIFF setup:", error);
-    // });
+    await initializeLiff();
 
     // 初期状態では送信ボタンを無効化
-    sendDateButton.disabled = true;
+    sendDatetimeButton.disabled = true;
+    // 初期表示の更新
+    updateSelectedDatetimeDisplay();
 });
