@@ -1,0 +1,116 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* カレンダーが長くなる場合を考慮 */
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f7f6;
+    padding-top: 20px; /* 上部に少し余白 */
+}
+
+.calendar-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 400px; /* 最大幅を設定 */
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.calendar-header button:hover {
+    background-color: #0056b3;
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 1.4em;
+    color: #333;
+}
+
+#calendar {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* セルの幅を均等にする */
+}
+
+#calendar th,
+#calendar td {
+    border: 1px solid #e0e0e0;
+    padding: 10px 0; /* 上下パディング、左右は均等配置で調整 */
+    text-align: center;
+    box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+}
+
+#calendar th {
+    background-color: #f8f9fa;
+    color: #555;
+    font-weight: normal;
+    font-size: 0.9em;
+}
+
+#calendar td {
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#calendar td:not(.empty):hover {
+    background-color: #e9ecef;
+}
+
+#calendar td.today {
+    background-color: #fff3cd; /* 少し薄い黄色 */
+    color: #856404; /* 暗めの黄色テキスト */
+    font-weight: bold;
+}
+
+#calendar td.selected {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+#calendar td.selected:hover {
+    background-color: #0056b3;
+}
+
+#calendar td.empty {
+    background-color: #fdfdfd;
+    cursor: default;
+}
+#calendar td.empty:hover {
+    background-color: #fdfdfd; /* ホバー効果なし */
+}
+
+#selected-date-info {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    font-size: 1em;
+    color: #333;
+}
+
+#selected-date-value {
+    font-weight: bold;
+}
